@@ -1,6 +1,7 @@
 import re
 import csv
 import pandas as pd
+import numpy as np
 
 def find_sources(string):
     url_https = re.findall('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', string)
@@ -28,6 +29,7 @@ def check(text):
     # zaladuj pliki .csv do dataframe
     df_1 = pd.read_csv('politifact_fake.csv')
     df_2 = pd.read_csv('gossipcop_fake.csv')
+
     # ekstrakcja URL źródeł do sprawdzenia
     sources_list = find_sources(text)
     print("Zrodla ktore znalazlem: ", sources_list)
@@ -39,17 +41,23 @@ def check(text):
         print("Sprawdzana domena to: ", checked_domain)
         # sprawdz czy adres znajduje sie w ktorejs z dfow
         # RAMKA 1: INDEKSY 0-431
-        for x in range(0 - 432):
+        for x in range(0, 432):
+            print("Wchodze do petli")
+            try:
+                assert df_1.loc[x, 'news_url'] != np.nan
+            except:
+                print("Wyjatek!")
+                continue
             fake_domain = find_domain(df_1.loc[x, 'news_url'])
-            print("Falszywa domena do ktorej sprawdzam: ",fake_domain)
+            print(x, ". Falszywa domena do ktorej sprawdzam: ",fake_domain)
             if checked_domain == fake_domain:
                 fake_source_found = 1
                 print("Znaleziono falszywa domene. Sprawdzana domena: ", checked_domain, "fake z bazy: ", fake_domain)
                 break
         # RAMKA 2: INDEKSY 0 - 5322
-        for y in range(0 - 5323):
+        for y in range(0, 5323):
             fake_domain = find_domain(df_2.loc[y, 'news_url'])
-            print("falszywa domena do ktorej sprawdzam: ", fake_domain)
+            print(y, ". Falszywa domena do ktorej sprawdzam: ", fake_domain)
             if checked_domain == fake_domain:
                 fake_source_found = 1
                 print("Znaleziono falszywa domene. Sprawdzana domena: ", checked_domain, "fake z bazy: ", fake_domain)
